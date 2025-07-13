@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Typeform-Style Multi-Step Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #232323;
+      font-family: 'Barlow', Arial, sans-serif;
+      color: #F5F3E7;
+      margin: 0;
+      min-height: 100vh;
+      font-size: 15px;
+    }
+    .main-layout {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      justify-content: center;
+      gap: 0;
+    }
+    .top-preview {
+      width: 100vw;
+      max-width: 100vw;
+      margin-left: 0;
+      margin-right: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      margin-top: 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #232323;
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+      box-sizing: border-box;
+    }
+    .step-preview {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
+    .step-q {
+      font-size: 0.85rem;
+      color: #F5F3E7;
+      opacity: 1;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 400;
+      cursor: pointer;
+      border-radius: 8px;
+      padding: 0.2rem 0.5rem;
+      user-select: none;
+      background: none;
+    }
+    .step-q.current {
+      font-weight: 600;
+      background: #353535;
+    }
+    .step-q-num {
+      font-size: 0.8rem;
+      background: #232323;
+      border: 1.2px solid #E9DFCA;
+      color: #E9DFCA;
+      border-radius: 50%;
+      width: 1.2rem;
+      height: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      margin-right: 0.4rem;
+    }
+    .form-area {
+      flex: 1;
+      min-width: 320px;
+      max-width: 100vw;
+      width: 100vw;
+      margin-left: 0;
+      margin-right: 0;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #353535;
+      border-radius: 0;
+      margin-bottom: 2rem;
+      overflow: hidden;
+      position: sticky;
+      top: 5.5rem;
+      z-index: 20;
+    }
+    .progress-bar-inner {
+      height: 100%;
+      background: #672b49;
+      width: 0;
+      transition: width 0.4s cubic-bezier(.4,2,.6,1);
+    }
+    .question-card {
+      width: 100%;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #353535;
+      position: relative;
+      padding-left: 2vw;
+      padding-right: 2vw;
+      box-sizing: border-box;
+      display: none;
+    }
+    .question-card.active {
+      display: block;
+    }
+    .question-row,
+    .input-area,
+    .nav-btns,
+    .considered-msg {
+      width: 100%;
+      justify-content: flex-start;
+      text-align: left;
+      margin-left: 0;
+      margin-right: 0;
+      align-items: flex-start;
+    }
+    .question-card:last-of-type {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .question-row {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      margin-bottom: 1.2rem;
+      width: 100%;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .question-number {
+      font-size: 1.05rem;
+      color: #F5F3E7;
+      opacity: 0.8;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+    }
+    .arrow {
+      font-size: 1.1rem;
+      margin-right: 0.4rem;
+      color: #F5F3E7;
+      opacity: 0.8;
+    }
+    .question {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #F5F3E7;
+      line-height: 1.2;
+      width: 100%;
+      display: block;
+    }
+    .q-count {
+      font-size: 0.8rem;
+      color: #E9DFCA;
+      font-weight: 600;
+      margin-left: 1rem;
+      opacity: 0.8;
+    }
+    .input-area {
+      width: 100%;
+      margin-bottom: 1rem;
+      box-sizing: border-box;
+    }
+    .input, textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid #F5F3E7;
+      color: #F5F3E7;
+      font-size: 1.1rem;
+      font-family: inherit;
+      padding: 0.2rem 0 0.35rem 0;
+      margin-bottom: 0.3rem;
+      outline: none;
+      transition: border-color 0.2s;
+      resize: none;
+      box-sizing: border-box;
+      overflow: hidden;
+      line-height: 1.6;
+    }
+    .input::placeholder, textarea::placeholder {
+      color: #888;
+      opacity: 1;
+      font-size: 1.1rem;
+    }
+    .instructions {
+      font-size: 0.8rem;
+      color: #F5F3E7;
+      opacity: 0.7;
+      margin-bottom: 1.5rem;
+    }
+    .instructions strong {
+      font-weight: 600;
+      color: #F5F3E7;
+    }
+    .nav-btns {
+      gap: 1rem;
+      margin-top: 1rem;
+      justify-content: center;
+      display: flex;
+    }
+    .nav-btn {
+      background: #E9DFCA;
+      color: #232323;
+      border: none;
+      border-radius: 8px;
+      padding: 0.4rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      box-shadow: 0 2px 8px #0002;
+    }
+    .nav-btn:active {
+      background: #d6c9b0;
+    }
+    .nav-btn[disabled] {
+      background: #b6b1a7;
+      color: #888;
+      cursor: not-allowed;
+    }
+    .nav-btn.secondary {
+      background: transparent;
+      color: #E9DFCA;
+      border: 1px solid #E9DFCA;
+      box-shadow: none;
+    }
+    .nav-btn.secondary:active {
+      background: #E9DFCA;
+      color: #232323;
+    }
+    .nav-btn.secondary[disabled] {
+      background: transparent;
+      color: #888;
+      border-color: #888;
+    }
+    .enter-tip {
+      color: #F5F3E7;
+      opacity: 0.7;
+      font-size: 0.85rem;
+      margin-left: 0.4rem;
+    }
+    .considered-msg {
+      font-size: 0.9rem;
+      color: #E9DFCA;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      opacity: 0.95;
+      letter-spacing: 0.01em;
+      display: none;
+      align-items: center;
+      gap: 1rem;
+    }
+    .considered-msg.active {
+      display: flex;
+      animation: fadeIn 0.5s;
+    }
+    .clear-link {
+      color: #b6b1a7;
+      font-size: 0.92rem;
+      font-weight: 400;
+      margin-left: 1.2rem;
+      cursor: pointer;
+      text-decoration: underline;
+      background: none;
+      border: none;
+      padding: 0;
+      transition: color 0.2s;
+    }
+    .clear-link:hover {
+      color: #eab308;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .success {
+      text-align: left;
+      color: #F5F3E7;
+      font-size: 1.1rem;
+      margin-top: 1.5rem;
+    }
+    .submit-btn {
+      background: #E9DFCA;
+      color: #232323;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1.2rem;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin: 2rem 0 0 0;
+      display: block;
+      box-shadow: 0 2px 8px #0002;
+      transition: background 0.2s;
+    }
+    .submit-btn:active {
+      background: #d6c9b0;
+    }
+    @media (max-width: 1300px) {
+      .top-preview, .form-area { max-width: 100vw; }
+      .question-card { max-width: 100vw; }
+    }
+    @media (max-width: 900px) {
+      .main-layout { flex-direction: column; gap: 0; }
+      .form-area { max-width: 100vw; padding: 0 1rem; margin-left: 0; margin-right: 0; }
+      .top-preview { flex-direction: column; gap: 1rem; position: static; padding: 1rem 0; margin-left: 0; margin-right: 0; }
+      .question-card { max-width: 100vw; }
+    }
+    @media (max-width: 600px) {
+      .question { font-size: 1rem; }
+      .input, textarea { font-size: 1rem; }
+      .ok-btn { font-size: 0.85rem; padding: 0.5rem 0.8rem; }
+      .top-preview { gap: 0.5rem; }
+      .submit-btn { font-size: 0.9rem; padding: 0.5rem 1rem; }
+    }
+    /* Modal overlay styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(30,30,30,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .thankyou-modal {
+      background: #232323;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px #0008;
+      padding: 2.5rem 2.5rem 2rem 2.5rem;
+      text-align: center;
+      color: #F5F3E7;
+      min-width: 320px;
+      max-width: 90vw;
+      font-family: 'Barlow', Arial, sans-serif;
+    }
+    .thankyou-modal .submit-btn {
+      margin: 2rem auto 0 auto;
+      display: block;
+      width: auto;
+      background: #672b49;
+      color: #fff;
+      border: none;
+      font-weight: 700;
+      font-size: 1.05rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px #0005, 0 1.5px 0 #4d1e36 inset;
+      text-decoration: none;
+      transition: box-shadow 0.2s, transform 0.1s;
+      background: linear-gradient(180deg, #7d3357 0%, #672b49 100%);
+    }
+    .thankyou-modal .submit-btn:active {
+      background: #4d1e36;
+      transform: translateY(2px) scale(0.98);
+      box-shadow: 0 2px 8px #0003;
+    }
+    .thankyou-modal .submit-btn:hover {
+      background: #8a3a67;
+      box-shadow: 0 6px 24px #0007, 0 1.5px 0 #4d1e36 inset;
+      transform: translateY(-1px) scale(1.01);
+    }
+    .step-q, .step-q-num, .question, .input, textarea, .nav-btn, .submit-btn, .instructions, .considered-msg, .q-count, .success {
+      font-family: 'Barlow', Arial, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-layout">
+    <div class="top-preview" id="topPreview">
+      <div class="step-preview" id="stepPreview">
+        <div class="step-q current"><span class="step-q-num">1</span>Contribute Information</div>
+        <div class="step-q"><span class="step-q-num">2</span>Add New Promise</div>
+        <div class="step-q"><span class="step-q-num">3</span>Give Feedback</div>
+        <div class="step-q"><span class="step-q-num">4</span>Contact Information</div>
+      </div>
+    </div>
+    <div class="form-area">
+      <div class="progress-bar"><div class="progress-bar-inner" id="progress"></div></div>
+      <form class="form-card" id="multiStepForm" autocomplete="off">
+          <div class="fade question-card active" data-step="0">
+            <div class="question-row">
+              <span class="question-number">1</span>
+              <span class="arrow">→</span>
+              <span class="question">Provide us details of any evidence supporting or contradicting the progress of any promise in the Anura Meter.</span>
+              <span class="q-count" id="qCount">1/4</span>
+            </div>
+            <div class="input-area">
+              <textarea class="input" name="q1" placeholder="Type your answer here..." rows="2"></textarea>
+            </div>
+            <div class="instructions"><strong>Shift ⇧ + Enter ↵</strong> to make a line break</div>
+            <div class="nav-btns">
+              <button type="button" class="nav-btn secondary" id="prevBtn0">Previous Question</button>
+              <button type="button" class="nav-btn" id="okBtn0">OK</button>
+              <button type="button" class="nav-btn secondary" id="nextBtn0">Next Question</button>
+            </div>
+            <div class="considered-msg" id="considered0">Response considered ✓ <button class="clear-link">Clear response</button></div>
+          </div>
+          <div class="fade question-card" data-step="1">
+            <div class="question-row">
+              <span class="question-number">2</span>
+              <span class="arrow">→</span>
+              <span class="question">Request to add a new promise under; 1. Economic Reform, 2. Governance, 3. Anti-corruption, or 4. Social Protection.</span>
+              <span class="q-count" id="qCount">2/4</span>
+            </div>
+            <div class="input-area">
+              <textarea class="input" name="q2" placeholder="Type your answer here..." rows="2"></textarea>
+            </div>
+            <div class="instructions"><strong>Shift ⇧ + Enter ↵</strong> to make a line break</div>
+            <div class="nav-btns">
+              <button type="button" class="nav-btn secondary" id="prevBtn1">Previous Question</button>
+              <button type="button" class="nav-btn" id="okBtn1">OK</button>
+              <button type="button" class="nav-btn secondary" id="nextBtn1">Next Question</button>
+            </div>
+            <div class="considered-msg" id="considered1">Response considered ✓ <button class="clear-link">Clear response</button></div>
+          </div>
+          <div class="fade question-card" data-step="2">
+            <div class="question-row">
+              <span class="question-number">3</span>
+              <span class="arrow">→</span>
+              <span class="question">Give us your feedback on the initiative.</span>
+              <span class="q-count" id="qCount">3/4</span>
+            </div>
+            <div class="input-area">
+              <textarea class="input" name="q3" placeholder="Type your answer here..." rows="2"></textarea>
+            </div>
+            <div class="instructions"><strong>Shift ⇧ + Enter ↵</strong> to make a line break</div>
+            <div class="nav-btns">
+              <button type="button" class="nav-btn secondary" id="prevBtn2">Previous Question</button>
+              <button type="button" class="nav-btn" id="okBtn2">OK</button>
+              <button type="button" class="nav-btn secondary" id="nextBtn2">Next Question</button>
+            </div>
+            <div class="considered-msg" id="considered2">Response considered ✓ <button class="clear-link">Clear response</button></div>
+          </div>
+          <div class="fade question-card" data-step="3">
+            <div class="question-row">
+              <span class="question-number">4</span>
+              <span class="arrow">→</span>
+              <span class="question">Type in your contact information to help us get in touch with you.</span>
+              <span class="q-count" id="qCount">4/4</span>
+            </div>
+            <div class="input-area">
+              <label style="display:block; margin-bottom:0.5rem;">
+                <span style="font-size:0.98em; font-weight:500;">First name</span><br>
+                <input class="input" type="text" name="contact_first" placeholder="Jane">
+              </label>
+              <label style="display:block; margin-bottom:0.5rem;">
+                <span style="font-size:0.98em; font-weight:500;">Last name</span><br>
+                <input class="input" type="text" name="contact_last" placeholder="Smith">
+              </label>
+              <label style="display:block; margin-bottom:0.5rem;">
+                <span style="font-size:0.98em; font-weight:500;">Phone number</span><br>
+                <input class="input" type="text" name="contact_phone" placeholder="071 234 5678">
+              </label>
+              <label style="display:block; margin-bottom:0.5rem;">
+                <span style="font-size:0.98em; font-weight:500;">Email</span><br>
+                <input class="input" type="email" name="contact_email" placeholder="name@example.com">
+              </label>
+              <label style="display:block; margin-bottom:0.5rem;">
+                <span style="font-size:0.98em; font-weight:500;">Company</span><br>
+                <input class="input" type="text" name="contact_company" placeholder="Acme Corporation">
+              </label>
+            </div>
+            <div class="nav-btns">
+              <button type="button" class="nav-btn secondary" id="prevBtn3">Previous Question</button>
+              <button type="button" class="nav-btn" id="okBtn3">OK</button>
+              <button type="button" class="nav-btn secondary" id="nextBtn3">Next Question</button>
+            </div>
+            <div class="considered-msg" id="considered3">Response considered ✓ <button class="clear-link">Clear response</button></div>
+            <button type="submit" class="submit-btn" id="submitBtn">Submit Responses</button>
+          </div>
+          <div class="fade question-card" data-step="4">
+            <div class="success" id="successMsg">Thank you! Your responses were recorded.</div>
+            <div style="margin-top:2rem; text-align:center;">
+              <a href="https://manthri.lk/en/anura-meter" target="_blank" class="submit-btn" style="display:inline-block; margin-top:1rem;">Visit the Anura Meter</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    <div class="modal-overlay" id="thankYouModal">
+      <div class="thankyou-modal">
+        <div style="font-size:1.15rem; font-weight:400; margin-bottom:0.7rem;">
+           Thank you for your contribution!<br>Your responses were submitted.
+        </div>
+        <div style="text-align:center; font-family:monospace; font-size:1.3em; margin-bottom:1.2rem;">:)</div>
+        <a href="https://manthri.lk/en/anura-meter" target="_blank" class="submit-btn" style="display:inline-block;">Visit the Anura Meter</a>
+      </div>
+    </div>
+    <div class="modal-overlay" id="errorModal" style="z-index:2000;">
+      <div class="thankyou-modal">
+        <div style="font-size:1.15rem; font-weight:400; margin-bottom:1.2rem; color:#e57373;">There was an error submitting your response.<br>Please try again later.</div>
+        <button onclick="document.getElementById('errorModal').classList.remove('active')" class="submit-btn" style="background:#444;">Close</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Multi-step logic
+    const form = document.getElementById('multiStepForm');
+    const steps = Array.from(form.querySelectorAll('.fade'));
+    const progress = document.getElementById('progress');
+    const stepPreview = document.getElementById('stepPreview').children;
+    let currentStep = 0;
+    const totalSteps = 4;
+    const consideredMsgs = [
+      document.getElementById('considered0'),
+      document.getElementById('considered1'),
+      document.getElementById('considered2'),
+      document.getElementById('considered3')
+    ];
+
+    function showStep(n) {
+      // Hide all steps
+      steps.forEach(step => step.classList.remove('active'));
+      
+      // Show current step
+      if (n < totalSteps) {
+        steps[n].classList.add('active');
+      }
+      
+      // Update progress
+      progress.style.width = ((n + 1) / totalSteps) * 100 + '%';
+      
+      // Update preview highlighting
+      for (let i = 0; i < stepPreview.length; i++) {
+        stepPreview[i].classList.remove('current');
+        if (i === n) stepPreview[i].classList.add('current');
+      }
+      
+      // Update navigation buttons
+      updateNavButtons();
+      
+      // Focus input if available
+      const input = steps[n]?.querySelector('input, textarea');
+      if (input) setTimeout(() => input.focus(), 100);
+    }
+
+    function updateNavButtons() {
+      // Q1: disable prev
+      document.getElementById('prevBtn0').disabled = true;
+      document.getElementById('nextBtn0').disabled = false;
+      // Q4: disable next
+      document.getElementById('nextBtn3').disabled = true;
+      document.getElementById('prevBtn3').disabled = false;
+      // Q2/Q3: all enabled
+      document.getElementById('prevBtn1').disabled = false;
+      document.getElementById('nextBtn1').disabled = false;
+      document.getElementById('prevBtn2').disabled = false;
+      document.getElementById('nextBtn2').disabled = false;
+    }
+
+    function goToStep(n) {
+      if (n >= 0 && n < totalSteps) {
+        currentStep = n;
+        showStep(currentStep);
+      }
+    }
+
+    function nextStep() {
+      if (currentStep < totalSteps - 1) {
+        goToStep(currentStep + 1);
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 0) {
+        goToStep(currentStep - 1);
+      }
+    }
+
+    // Navigation button event listeners
+    for (let i = 0; i < totalSteps; i++) {
+      // Previous button
+      const prevBtn = document.getElementById('prevBtn' + i);
+      if (prevBtn) {
+        prevBtn.onclick = () => prevStep();
+      }
+      // Next button
+      const nextBtn = document.getElementById('nextBtn' + i);
+      if (nextBtn) {
+        nextBtn.onclick = () => nextStep();
+      }
+      // OK button
+      const okBtn = document.getElementById('okBtn' + i);
+      const input = steps[i].querySelector('input, textarea');
+      const msg = consideredMsgs[i];
+      if (okBtn) {
+        okBtn.onclick = () => {
+          if (input && input.value.trim() !== '') {
+            msg.classList.add('active');
+          } else {
+            msg.classList.remove('active');
+          }
+        };
+      }
+      // Clear response logic
+      const clearBtn = msg?.querySelector('.clear-link');
+      if (clearBtn) {
+        clearBtn.onclick = (e) => {
+          e.preventDefault();
+          if (input) input.value = '';
+          msg.classList.remove('active');
+        };
+      }
+    }
+
+    // Clickable step preview - allow jumping to any step
+    for (let i = 0; i < stepPreview.length; i++) {
+      stepPreview[i].onclick = () => {
+        goToStep(i);
+      };
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const activeStep = steps[currentStep];
+        const okBtn = activeStep?.querySelector('.nav-btn:not(.secondary)');
+        if (okBtn && !okBtn.disabled) {
+          okBtn.click();
+        }
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevStep();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        nextStep();
+      }
+    });
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      consideredMsgs.forEach(msg => msg.classList.remove('active'));
+
+      // Gather all form data
+      const formData = new FormData(form);
+      const data = {};
+      formData.forEach((value, key) => data[key] = value);
+
+      try {
+        const resp = await fetch('https://script.google.com/macros/s/AKfycbwX7owTUhUfgj9cxma8eAOSW47vVmpsGd4ypebx5O2nVmovOm7a2ayYcczip6nKGbSQeg/exec', {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const text = await resp.text();
+        console.log('Google Apps Script response:', text);
+        if (resp.ok && text.match(/success/i)) {
+          document.getElementById('thankYouModal').classList.add('active');
+        } else {
+          alert('Submission failed: ' + text);
+          document.getElementById('errorModal').classList.add('active');
+        }
+      } catch (err) {
+        alert('Network or script error: ' + err);
+        document.getElementById('errorModal').classList.add('active');
+      }
+    };
+
+    // Center submit button
+    document.getElementById('submitBtn').style.display = 'block';
+    document.getElementById('submitBtn').style.margin = '2rem auto 0 auto';
+
+    // Initialize
+    showStep(currentStep);
+
+    // Auto-expand textarea as user types
+    document.querySelectorAll('textarea.input').forEach(textarea => {
+      textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+      });
+      // Trigger once in case of prefilled value
+      textarea.dispatchEvent(new Event('input'));
+    });
+  </script>
+</body>
+</html> 
